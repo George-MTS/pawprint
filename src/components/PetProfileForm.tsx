@@ -7,7 +7,7 @@ interface Props {
   onComplete: (profile: PetProfile) => void;
 }
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 function calcAge(birthday: string): string {
   if (!birthday) return '';
@@ -44,6 +44,7 @@ function OptionBtn({ active, onClick, children }: { active: boolean; onClick: ()
 
 export default function PetProfileForm({ onComplete }: Props) {
   const [step, setStep] = useState(1);
+  const [petType, setPetType] = useState<PetProfile['petType'] | ''>('');
   const [name, setName] = useState('');
   const [gender, setGender] = useState<PetProfile['gender'] | ''>('');
   const [birthday, setBirthday] = useState('');
@@ -61,6 +62,7 @@ export default function PetProfileForm({ onComplete }: Props) {
 
   const finish = () => {
     onComplete({
+      petType: petType as PetProfile['petType'],
       name, gender: gender as PetProfile['gender'], birthday,
       size: size as PetProfile['size'], weight: parseFloat(weight) || 0, weightUnit,
       coat: coat as PetProfile['coat'], ears: ears as PetProfile['ears'],
@@ -76,6 +78,7 @@ export default function PetProfileForm({ onComplete }: Props) {
   const wrap: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '12px' };
 
   const canContinue = [
+    petType !== '',
     name.trim().length > 0,
     gender !== '',
     birthday !== '',
@@ -103,10 +106,25 @@ export default function PetProfileForm({ onComplete }: Props) {
         </div>
       </div>
 
-      {/* Step 1 — Name */}
+      {/* Step 1 — Pet type */}
       {step === 1 && (
         <div className="fade-in">
-          <h2 style={heading}>What's your pet's name? 🐾</h2>
+          <h2 style={heading}>Who are we celebrating today? 🐾</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+            {([['dog', '🐶', 'Dog'], ['cat', '🐱', 'Cat']] as const).map(([val, emoji, label]) => (
+              <OptionBtn key={val} active={petType === val} onClick={() => { setPetType(val); setTimeout(advance, 200); }}>
+                <span style={{ display: 'block', fontSize: '40px', marginBottom: '8px' }}>{emoji}</span>
+                <span>{label}</span>
+              </OptionBtn>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Step 2 — Name */}
+      {step === 2 && (
+        <div className="fade-in">
+          <h2 style={heading}>What's your {petType}'s name? 🐾</h2>
           <input
             type="text" value={name} onChange={e => setName(e.target.value)}
             placeholder="e.g. Buddy, Luna, Max…"
@@ -117,8 +135,8 @@ export default function PetProfileForm({ onComplete }: Props) {
         </div>
       )}
 
-      {/* Step 2 — Gender */}
-      {step === 2 && (
+      {/* Step 3 — Gender */}
+      {step === 3 && (
         <div className="fade-in">
           <h2 style={heading}>Are they a good boy or good girl?</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
@@ -131,8 +149,8 @@ export default function PetProfileForm({ onComplete }: Props) {
         </div>
       )}
 
-      {/* Step 3 — Birthday */}
-      {step === 3 && (
+      {/* Step 4 — Birthday */}
+      {step === 4 && (
         <div className="fade-in">
           <h2 style={heading}>When's their birthday? 🎂</h2>
           <input
@@ -148,8 +166,8 @@ export default function PetProfileForm({ onComplete }: Props) {
         </div>
       )}
 
-      {/* Step 4 — Size */}
-      {step === 4 && (
+      {/* Step 5 — Size */}
+      {step === 5 && (
         <div className="fade-in">
           <h2 style={heading}>How big is your baby?</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
@@ -163,8 +181,8 @@ export default function PetProfileForm({ onComplete }: Props) {
         </div>
       )}
 
-      {/* Step 5 — Weight */}
-      {step === 5 && (
+      {/* Step 6 — Weight */}
+      {step === 6 && (
         <div className="fade-in">
           <h2 style={heading}>How heavy is your furball? ⚖️</h2>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -185,8 +203,8 @@ export default function PetProfileForm({ onComplete }: Props) {
         </div>
       )}
 
-      {/* Step 6 — Coat */}
-      {step === 6 && (
+      {/* Step 7 — Coat */}
+      {step === 7 && (
         <div className="fade-in">
           <h2 style={heading}>What's their fur situation? 🪮</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
@@ -199,8 +217,8 @@ export default function PetProfileForm({ onComplete }: Props) {
         </div>
       )}
 
-      {/* Step 7 — Ears */}
-      {step === 7 && (
+      {/* Step 8 — Ears */}
+      {step === 8 && (
         <div className="fade-in">
           <h2 style={heading}>How do their ears roll? 👂</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -213,8 +231,8 @@ export default function PetProfileForm({ onComplete }: Props) {
         </div>
       )}
 
-      {/* Step 8 — Energy */}
-      {step === 8 && (
+      {/* Step 9 — Energy */}
+      {step === 9 && (
         <div className="fade-in">
           <h2 style={heading}>Vibe check — how wild are they? 🔥</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -235,7 +253,7 @@ export default function PetProfileForm({ onComplete }: Props) {
             ← Back
           </button>
         )}
-        {step < TOTAL_STEPS && step !== 2 && step !== 4 && step !== 6 && step !== 7 && (
+        {step < TOTAL_STEPS && step !== 1 && step !== 3 && step !== 5 && step !== 7 && step !== 8 && (
           <button type="button" onClick={advance} disabled={!canContinue}
             style={{ ...btnBase, padding: '12px 24px', flex: 2, background: canContinue ? 'var(--gold)' : 'var(--surface)', color: canContinue ? 'var(--text-on-gold)' : 'var(--subtle)', borderColor: canContinue ? 'var(--gold)' : 'var(--border)', cursor: canContinue ? 'pointer' : 'not-allowed' }}>
             Continue →
