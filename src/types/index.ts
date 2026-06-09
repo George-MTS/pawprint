@@ -42,6 +42,7 @@ export interface StatsResponse {
 }
 
 export interface PetProfile {
+  petType: 'dog' | 'cat';
   name: string;
   gender: 'boy' | 'girl' | 'other';
   birthday: string;
@@ -68,6 +69,7 @@ export interface BreedScanResult {
 export interface ScanAPIResponse {
   success: boolean;
   result?: BreedScanResult;
+  submissionId?: string;
   error?: string;
   limitReached?: boolean;
   testMode?: boolean;

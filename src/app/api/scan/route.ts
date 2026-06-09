@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server';
+import { v4 as uuidv4 } from 'uuid';
 import { anthropic } from '@/lib/anthropic';
+import { createServiceClient } from '@/lib/supabase';
 import { bufferToBase64 } from '@/lib/utils';
 import { checkAndIncrement } from '@/lib/usageCounter';
 import { IS_TEST_MODE, MOCK_SCAN_RESULT } from '@/lib/mockData';
@@ -71,6 +73,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const buffer = await imageFile.arrayBuffer();
     const base64 = bufferToBase64(buffer);
 
+    const petType = (formData.get('petType') as string) || 'dog';
     const name = (formData.get('name') as string) || '';
     const size = (formData.get('size') as string) || '';
     const weight = (formData.get('weight') as string) || '';
@@ -96,7 +99,46 @@ export async function POST(request: NextRequest): Promise<Response> {
       result = await callClaude(base64, imageFile.type, context);
     }
 
-    return Response.json({ success: true, result } satisfies ScanAPIResponse);
+    // Save submission to database (fire-and-forget — don't fail the response if storage/DB errors)
+    let submissionId: string | undefined;
+    try {
+      const supabase = createServiceClient();
+      const filename = `${Date.now()}_${uuidv4()}.jpg`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('pet-photos')
+        .upload(filename, buffer, { contentType: imageFile.type, upsert: false });
+
+      const imageUrl = uploadError
+        ? null
+        : supabase.storage.from('pet-photos').getPublicUrl(uploadData!.path).data.publicUrl;
+
+      const traits = [
+        size && { label: 'Size', value: size },
+        weight && { label: 'Weight', value: weight },
+        coat && { label: 'Coat', value: coat },
+        ears && { label: 'Ears', value: ears },
+        energy && { label: 'Energy', value: energy },
+      ].filter(Boolean);
+
+      const { data } = await supabase.from('submissions').insert({
+        pet_type: petType === 'cat' ? 'cat' : 'dog',
+        pet_name: name || null,
+        age: birthday || null,
+        image_url: imageUrl,
+        ai_breed_identified: result.primary_breed,
+        ai_temperament: result.typical_temperament,
+        ai_care_notes: result.common_health_considerations,
+        ai_traits: traits.length ? traits : null,
+        ai_fun_fact: result.fun_fact,
+        raw_ai_response: result,
+      }).select('id').single();
+
+      submissionId = data?.id;
+    } catch (err) {
+      console.error('[scan] DB save failed (non-fatal):', err);
+    }
+
+    return Response.json({ success: true, result, submissionId } satisfies ScanAPIResponse);
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
     return Response.json({ success: false, error: msg } satisfies ScanAPIResponse, { status: 500 });

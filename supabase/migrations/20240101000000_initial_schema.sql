@@ -1,6 +1,3 @@
--- Reference copy of the schema. The authoritative source is supabase/migrations/.
--- Run `supabase start` to apply all migrations automatically.
-
 -- Submissions table
 CREATE TABLE IF NOT EXISTS submissions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -41,7 +38,3 @@ SELECT
   COUNT(*) FILTER (WHERE pet_type = 'dog') AS dog_count,
   COUNT(*) FILTER (WHERE pet_type = 'cat') AS cat_count
 FROM submissions;
-
--- Storage bucket (run this separately in Supabase dashboard or via API)
--- Bucket name: pet-photos
--- Public: true

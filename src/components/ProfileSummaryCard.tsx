@@ -74,6 +74,7 @@ export default function ProfileSummaryCard({ profile, onResult, onReset }: Props
 
     const fd = new FormData();
     fd.append('image', imageFile);
+    fd.append('petType', profile.petType);
     fd.append('name', profile.name);
     fd.append('birthday', profile.birthday);
     fd.append('size', profile.size);

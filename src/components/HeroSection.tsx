@@ -12,7 +12,7 @@ export default function HeroSection() {
         <span style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Better.</span>
       </h1>
       <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '14px', color: 'var(--muted)', lineHeight: 1.75, maxWidth: '500px', margin: '0 auto' }}>
-        Answer 8 quick questions, snap a photo, and our AI delivers a full breed profile in seconds.
+        Answer 9 quick questions, snap a photo, and our AI delivers a full breed profile in seconds.
       </p>
     </section>
   );
