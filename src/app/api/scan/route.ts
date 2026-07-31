@@ -15,7 +15,7 @@ async function callClaude(base64: string, mime: string, context: string): Promis
   const safeMime = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(mime) ? mime : 'image/jpeg';
 
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-5',
     max_tokens: 1200,
     messages: [
       {
